@@ -70,10 +70,21 @@ export async function guardedFetch(input: string, opts: GuardedFetchOptions = {}
   let url = await check(input);
   const maxRedirects = opts.maxRedirects ?? 5;
   const maxBytes = opts.maxBytes ?? 8 * 1024 * 1024;
+  // Cookies a hop set, carried into the hops after it and never stored: a site that answers with
+  // Set-Cookie and a redirect to the same address gates on that cookie. dataeye.com does exactly
+  // this for the language it serves — a request carrying accept-language but no lang cookie is
+  // redirected back to itself, so without this the fetch spent its whole redirect budget on one
+  // page and failed ("Too many redirects") on a listing that reads fine once the cookie goes back.
+  let cookies: string[] = [];
   for (let hop = 0; ; hop++) {
     const res = await undiciFetch(url, {
       method: opts.method ?? "GET",
-      headers: { "user-agent": DEFAULT_UA, "accept-language": "zh-CN,zh;q=0.9,en;q=0.8", ...(opts.headers ?? {}) },
+      headers: {
+        "user-agent": DEFAULT_UA,
+        "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+        ...(cookies.length ? { cookie: cookies.join("; ") } : {}),
+        ...(opts.headers ?? {}),
+      },
       body: opts.body,
       redirect: "manual",
       dispatcher: dispatcherFor(proxied(url, route)),
@@ -82,6 +93,11 @@ export async function guardedFetch(input: string, opts: GuardedFetchOptions = {}
     if (res.status >= 300 && res.status < 400 && res.headers.get("location")) {
       // Release the connection even when the next URL is refused or the redirect limit is reached.
       await res.body?.cancel();
+      for (const header of res.headers.getSetCookie()) {
+        const pair = header.split(";")[0]!;
+        const name = pair.slice(0, pair.indexOf("="));
+        if (name) cookies = [...cookies.filter((c) => !c.startsWith(`${name}=`)), pair];
+      }
       if (hop >= maxRedirects) throw new Error(`Too many redirects for ${input}`);
       url = await check(new URL(res.headers.get("location")!, url).toString());
       continue;

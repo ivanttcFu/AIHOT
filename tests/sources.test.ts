@@ -82,8 +82,31 @@ const pages: Record<string, (cdn: string) => string> = {
     '{title:"MiMo Humanities and Social Sciences Capability Assessment",link:"/blog/mimo-v2-flash-hss",desc:"MiMo Humanities and Social Sciences Capability Assessment"}]}),' +
     '(0,n.jsx)(c.Q,{sectionTitle:"Join Us",positions:[{title:"Research Scientist - Pre-training",link:"joinUs/pre-training"}],contactEmail:"mimo@xiaomi.com"})]})}}}]);',
 };
+// dataeye.com/media-center.html (2026-09-29): one report card. The link wraps only the cover image, so
+// the title comes from the h5 beside it and the date from the card's own text ("发布日期：…"). The stray
+// quote in the date div is the page's own markup, kept so the fixture stays faithful to the site.
+const langGatePage =
+  `<html><body><div class="news-list"><div class="row row-cols-3"><div class="col column">` +
+  `<div class="cover "><a target="_blank" href="/report.html?key=DataEye2026%E4%B8%8A%E5%8D%8A%E5%B9%B4%E7%9C%9F%E4%BA%BA%E5%BE%AE%E7%9F%AD%E5%89%A7%E6%95%B0%E6%8D%AE%E6%8A%A5%E5%91%8A">` +
+  `<img src="//cdn.example.org/pdfReport/a.png" /></a></div>` +
+  `<h5 class="center">DataEye2026上半年真人微短剧数据报告</h5>` +
+  `<div class="desc"></div><div class="time center"">\n                  发布日期：2026-08-14\n                </div>` +
+  `</div></div></div></body></html>`;
+
 const server = http.createServer((req, res) => {
   const path = req.url ?? "";
+  // dataeye.com's language gate: Set-Cookie plus a redirect back to the same address, until the
+  // cookie comes back. A client that drops it loops until its redirect budget runs out.
+  if (path.startsWith("/lang-gate")) {
+    if (!(req.headers.cookie ?? "").includes("lang=zh-cn")) {
+      res.writeHead(302, { location: path, "set-cookie": "lang=zh-cn; path=/" });
+      res.end();
+      return;
+    }
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    res.end(langGatePage);
+    return;
+  }
   const found = Object.hasOwn(pages, path);
   res.writeHead(found ? 200 : 404, { "content-type": path.endsWith(".js") ? "application/javascript" : "text/html; charset=utf-8" });
   res.end(found ? pages[path]!(`${site}/cdn/`) : "");
@@ -240,4 +263,21 @@ test("an embedded payload holding two arrays of one name is reached by path", as
   assert.equal(got[0]!.url, `${site}/news/1224.html`);
   assert.equal(got[0]!.title, "极逸SOON大模型通过国家生成式人工智能服务备案");
   assert.equal(got[0]!.publishedAt?.toISOString(), new Date(1790227724 * 1000).toISOString());
+});
+
+test("a listing that gates on the cookie it sets is read, not looped", async () => {
+  // dataeye.com answers a request carrying accept-language with Set-Cookie and a redirect back to the
+  // same address; the listing is served once the cookie is sent back. The card's title and date live
+  // beside the link, not in it — the same selectors the source's config uses.
+  const out = await fetchWebList(source({
+    url: `${site}/lang-gate`,
+    allowUrlPrefixes: [`${site}/`],
+    itemSelector: "div.news-list div.col.column",
+    titleSelector: "h5",
+    publishedAtSelector: "div.time",
+  }));
+  assert.equal(out.length, 1);
+  assert.equal(out[0]!.title, "DataEye2026上半年真人微短剧数据报告");
+  assert.ok(out[0]!.url.startsWith(`${site}/report.html?key=`));
+  assert.equal(out[0]!.publishedAt?.toISOString().slice(0, 10), "2026-08-13", "the site's +08:00 day read as UTC");
 });
