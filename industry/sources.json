@@ -1,5 +1,5 @@
 {
-  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。⚠️ 验证状态（2026-09-29 联网核实）：① 8 厂商官博 + 5 游戏媒体——中文厂商/媒体无标准 RSS，全部 web_list + 真实站点 URL，原占位 URL 几乎全错、已逐个改正；② 3 买量平台官网 URL 已确认正确（App Growing 主站是产品页，改指向 /blog 内容列表；DataEye/巨量引擎指向主站）；③ 2 社区改为百度贴吧（标准 f?kw= URL，kw 已 URL 编码）。⚠️ 上线前仍需：web_list 是通用 HTML 列表解析，各站点版式不同，可能需逐个调 itemSelector/titleSelector 才能稳定抽正文；巨量引擎的《游戏x赛道·传奇月报》价值很高但入口在公众号/报告页，需再补真实 URL。owner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
+  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。\n\n⚠️ 验证状态（2026-09-29，两轮联网核实）：\n【第1轮·URL 核实】18 条全部核实：8 厂商官博（中文厂商无标准 RSS，占位 feedUrl 失效，全改 web_list + 真实站点）；5 游戏媒体（原占位 URL 全错，逐个改正）；3 买量（官网 URL 正确）；2 社区（NGA 无传奇版块 → 改百度贴吧，kw 已 URL 编码）。\n【第2轮·真实抓取干跑】用采集器同款解析逻辑（fromHtml：解析相对链接 → 套 allowUrlPrefixes → 排除 listingItself/导航链接 → 需有标题）实抓 18 条，结论：\n  ✅ 开箱可用、能抽出真实文章列表（2/18）：official-zhongshouyou、official-juren。\n  ⚠️ 能抓但只抽到导航菜单（“关于我们/集团介绍”），需补 itemSelector/titleSelector（9）：official-shengqu/kaiying/tanwan/shiji/sanqi、web-17173-mir2/gamersky-ol/youxituoluo/dataeye（web-oceanengine 已改 mp_account）。\n  ❌ 不可用（6）：official-wanmei（列表页仅 642B JS 壳）、web-youxiputao（仅 1 条）、web-appgrowing（仅 1 条）、web-nadianshi（域名正确但本环境不可达）、web-tieba-rxcq/legend（403 反爬，需 cookie/JS）。\n  → 结论：①“URL 核实”已 100% 完成；但“能真正抓取”仅 2/18 开箱可用，其余需逐站调 selector 或改采集方式（JS 渲染/cookie/换源），属上线调优 backlog，非配置层可解。r.jina.ai 渲染代理在本环境不可达，无法用它救 JS 壳/403 站。\n【巨量引擎】《游戏x赛道·传奇月报》按月发布、内容为传奇品类投放/CPM/激活付费成本/安卓iOS对比，对本项目价值极高，但只发在微信公众号「巨量引擎营销观察」（微信号 OceanEngineMK），非可爬网页 → 该条设 mp_account（内容需 Dajiala 付费服务）。\n\nowner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
   "sources": [
     {
       "id": "official-shengqu",
@@ -272,19 +272,18 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "web-oceanengine",
-      "name": "巨量引擎 游戏行业月报",
-      "kind": "web_list",
+      "id": "mp-oceanengine",
+      "name": "巨量引擎营销观察（含《游戏x赛道·传奇月报》）",
+      "kind": "mp_account",
       "config": {
-        "url": "https://www.oceanengine.com",
-        "allowUrlPrefixes": ["https://www.oceanengine.com/"],
-        "_aihot": { "initialBackfillLimit": 8 }
+        "wxid": "OceanEngineMK",
+        "nickname": "巨量引擎营销观察"
       },
       "tier": "T2",
       "first_party": false,
       "owner_entity_id": null,
       "participation_mode": "editorial",
-      "interval_minutes": 120,
+      "interval_minutes": 720,
       "tags": ["买量"],
       "site_fulltext": false,
       "syndicate_fulltext": false
