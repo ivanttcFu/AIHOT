@@ -25,6 +25,14 @@ function firstString(obj: unknown, paths: string[] | undefined): string | null {
   return null;
 }
 
+/** The embedded wrapper holds the configured key verbatim, dots and all, so match it as one key first. */
+function keyedValue(data: unknown, key: string): unknown {
+  if (data && typeof data === "object" && !Array.isArray(data) && key in (data as Record<string, unknown>)) {
+    return (data as Record<string, unknown>)[key];
+  }
+  return getPath(data, key);
+}
+
 /** "{path}" → encoded value, "{raw:path}" → raw value. Returns null when a referenced value is missing. */
 export function renderTemplate(template: string, item: unknown): string | null {
   let missing = false;
@@ -54,6 +62,13 @@ function toDate(v: unknown, unit: string | undefined): Date | null {
 }
 
 function findKey(obj: unknown, key: string, depth = 0): unknown {
+  // A dotted key names one place ("props.pageProps.groupYearList.data"). Searching by the bare last
+  // segment instead stops at the first array of that name: kingnet.com/news/all carries the articles
+  // and a sibling list of years, both called "data", and the years come first.
+  if (key.includes(".")) {
+    const v = getPath(obj, key);
+    return Array.isArray(v) ? v : undefined;
+  }
   if (depth > 12 || obj === null || typeof obj !== "object") return undefined;
   if (!Array.isArray(obj) && key in (obj as Record<string, unknown>)) {
     const v = (obj as Record<string, unknown>)[key];
@@ -95,10 +110,12 @@ function embeddedJson(html: string, source: SourceRow): unknown {
   }
   // html_json_key: scan JSON script blocks (e.g. __NEXT_DATA__) for the key.
   const key = String(source.config.jsonKey);
+  // A dotted key names a path, so a block carries only its last segment.
+  const marker = key.includes(".") ? key.slice(key.lastIndexOf(".") + 1) : key;
   for (const m of html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)) {
     const body = m[1]!.trim();
     // Flight payloads carry the key escaped inside a string (\"items\").
-    if (!body.includes(`"${key}"`) && !body.includes(`\\"${key}\\"`)) continue;
+    if (!body.includes(`"${marker}"`) && !body.includes(`\\"${marker}\\"`)) continue;
     const candidates = [body, body.replace(/^[^{[]*/, "").replace(/;?\s*$/, "")];
     for (const c of candidates) {
       try {
@@ -113,7 +130,7 @@ function embeddedJson(html: string, source: SourceRow): unknown {
     if (flight) {
       try {
         const decoded = JSON.parse(`"${flight[1]}"`) as string;
-        const idx = decoded.indexOf(`"${key}"`);
+        const idx = decoded.indexOf(`"${marker}"`);
         if (idx >= 0) {
           const objStart = decoded.lastIndexOf("{", idx);
           const parsed = JSON.parse(decoded.slice(objStart, decoded.indexOf("]", idx) + 1) + "}");
@@ -152,7 +169,7 @@ export async function fetchJsonList(source: SourceRow): Promise<Candidate[]> {
       throw new FetchError("response is not JSON");
     }
   }
-  let items = c.itemsPath ? getPath(data, c.itemsPath) : c.jsonKey ? getPath(data, c.jsonKey) : data;
+  let items = c.itemsPath ? getPath(data, c.itemsPath) : c.jsonKey ? keyedValue(data, c.jsonKey) : data;
   if (c.itemsObjectValues && items && typeof items === "object" && !Array.isArray(items)) items = Object.values(items);
   if (!Array.isArray(items)) throw new FetchError("items path did not resolve to an array");
 

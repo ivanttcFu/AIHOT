@@ -3,6 +3,7 @@
 // what made articles flip between versions: in-page anchors of an HTML listing and
 // promotions a feed rotates inside its posts. And the Xiaomi MiMo homepage, whose posts have no links in
 // its HTML: read without its adapter, it gave the menu (MiMo Desktop, 简体中文) as articles.
+// And an embedded payload whose articles share their key with a sibling list of years (kingnet.com).
 import "./setup.ts";
 import assert from "node:assert/strict";
 import http from "node:http";
@@ -38,6 +39,21 @@ const pages: Record<string, (cdn: string) => string> = {
     `<content type="html"><![CDATA[<p>${"The feed carries this post whole, paragraph after paragraph. ".repeat(30)}</p>]]></content></entry></feed>`,
   // A list API that gives calendar days as yyyymmdd.
   "/days.json": () => JSON.stringify({ data: { list: [{ seq: 695, ttl: "MCFlow", day: "20260922" }, { seq: 1, ttl: "Bad day", day: "20260230" }] } }),
+  // kingnet.com/news/all: the articles and a sibling list of years are both called "data".
+  "/cms/news": () =>
+    `<html><body><script id="__NEXT_DATA__" type="application/json">` +
+    JSON.stringify({
+      props: {
+        pageProps: {
+          groupYear: { meta: { status: 200 }, data: [{ year: "2026" }, { year: "2025" }] },
+          groupYearList: {
+            meta: { status: 200 },
+            data: [{ id: "1224", title: "极逸SOON大模型通过国家生成式人工智能服务备案", start_time: "1790227724", description: null, content: "<p>正文</p>" }],
+          },
+        },
+      },
+    }) +
+    `</script></body></html>`,
   // Google Developers Blog: no date in the feed or in meta tags, only in JSON-LD.
   "/ld-post": () =>
     `<html><head><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"Blog"},` +
@@ -209,4 +225,19 @@ test("dates in yyyymmdd and in JSON-LD are read", async () => {
   assert.deepEqual(days.map((c) => c.publishedAt?.toISOString() ?? null), ["2026-09-22T00:00:00.000Z", null], "February 30 is no date");
   const got = await fetchDetail(`${site}/ld-post`, { id: "test-feed", config: { detail: { maxFetches: 20 } } } as never, { date: true, title: false, summary: false, body: false });
   assert.equal(got.publishedAt?.toISOString(), "2026-09-24T00:00:00.000Z");
+});
+
+test("an embedded payload holding two arrays of one name is reached by path", async () => {
+  // kingnet.com/news/all: the year filter and the articles are both "data", the years first.
+  const base = { url: `${site}/cms/news`, mode: "html_json_key", titlePaths: ["title"], urlTemplate: `${site}/news/{id}.html`, publishedAtPath: "start_time", publishedAtUnit: "epoch_s" };
+  await assert.rejects(
+    fetchJsonList({ id: "test-json", config: { ...base, jsonKey: "data" } } as never),
+    /no items mapped/,
+    "the bare name stops at the list of years",
+  );
+  const got = await fetchJsonList({ id: "test-json", config: { ...base, jsonKey: "props.pageProps.groupYearList.data" } } as never);
+  assert.equal(got.length, 1);
+  assert.equal(got[0]!.url, `${site}/news/1224.html`);
+  assert.equal(got[0]!.title, "极逸SOON大模型通过国家生成式人工智能服务备案");
+  assert.equal(got[0]!.publishedAt?.toISOString(), new Date(1790227724 * 1000).toISOString());
 });

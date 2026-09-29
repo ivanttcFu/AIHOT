@@ -45,7 +45,7 @@ node scripts/check-sources.ts                 # 全部信源
 node scripts/check-sources.ts official- web-  # 只看这些前缀
 ```
 
-它对每条信源实抓一次、走采集器同款解析（`web_list` 用 `fetchWebList`，`json_list` 用 `fetchJsonList`），只把标题够长的算作“头条”。列表页的 `itemSelector` 没配对时，抽出来的是导航菜单（“关于我们”“首页”），脚本会标 `NO HEADLINES`——**这正是配置闸门 `assertSupportedConfig` 查不出来的那类问题**：配置合法，抓到的却是菜单。某个站是客户端渲染（JS 应用）时，HTML 里根本没有文章列表，这类站得换 `json_list` 接口或渲染代理。
+它对每条信源实抓一次、走采集器同款解析（`web_list` 用 `fetchWebList`，`json_list` 用 `fetchJsonList`），只把标题够长的算作“头条”。列表页的 `itemSelector` 没配对时，抽出来的是导航菜单（“关于我们”“首页”），脚本会标 `NO HEADLINES`——**这正是配置闸门 `assertSupportedConfig` 查不出来的那类问题**：配置合法，抓到的却是菜单。菜单里混进一两条长链接（业务页锚点、许可证 PDF）时标 `TOO FEW`：至少 **3** 条才算真的文章列表。某个站是客户端渲染（JS 应用）时，HTML 里根本没有文章列表，这类站得换 `json_list` 接口或渲染代理。
 
 每个信源的关键字段：
 

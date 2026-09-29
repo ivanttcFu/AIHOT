@@ -2,7 +2,8 @@
 // same parser the collector uses, so you can see what a crawl would actually ingest before
 // wiring it up. Sources that yield navigation menus or nothing are reported, not silently
 // accepted — a listing whose itemSelector misses returns the page's menu, which is exactly
-// the failure the config gate cannot catch.
+// the failure the config gate cannot catch. A source is reported unless it yields ENOUGH
+// headlines, so a menu with one long link in it (a business page, a licence PDF) is not an "ok".
 //
 // Usage: node scripts/check-sources.ts [sourceIdPrefix …]
 //   node scripts/check-sources.ts                 # all sources
@@ -19,6 +20,9 @@ import type { Candidate, SourceRow } from "@aihot/backend/sources/types";
 
 /** A title this long is a headline; shorter ones are menu items ("关于我们", "首页"). */
 const HEADLINE = 10;
+/** An article list yields several. A menu that slipped through yields none, or one or two long
+ *  non-articles: tanwan's "GAME LOVIN" business-page anchor, sanqi's ICP licence PDFs. */
+const ENOUGH = 3;
 
 const prefixes = process.argv.slice(2).filter((a) => !a.startsWith("-"));
 const { sources } = JSON.parse(readFileSync(path.join(REPO_ROOT, "industry/sources.json"), "utf8")) as { sources: SourceRow[] };
@@ -46,10 +50,10 @@ for (const s of sources) {
     note = error instanceof Error ? error.message : String(error);
   }
   const headlines = items.filter((c) => c.title.length >= HEADLINE);
-  const verdict = headlines.length ? "ok" : "NO HEADLINES";
-  if (!headlines.length) failures++;
+  const verdict = headlines.length >= ENOUGH ? "ok" : headlines.length ? "TOO FEW" : "NO HEADLINES";
+  if (headlines.length < ENOUGH) failures++;
   console.log(`${s.id.padEnd(22)} ${s.kind.padEnd(10)} items=${String(items.length).padEnd(4)} headlines=${String(headlines.length).padEnd(4)} ${verdict} ${note}`);
   for (const c of headlines.slice(0, 3)) console.log(`    · ${c.title.slice(0, 46)}\n      ${c.url.slice(0, 88)}`);
 }
-console.log(failures ? `\n${failures} source(s) yielded no headlines — check itemSelector/titleSelector.` : "\nAll collected sources yielded headlines.");
+console.log(failures ? `\n${failures} source(s) yielded no article list — check itemSelector/titleSelector.` : "\nAll collected sources yielded headlines.");
 process.exitCode = failures ? 1 : 0;
