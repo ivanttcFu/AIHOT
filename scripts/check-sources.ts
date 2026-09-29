@@ -16,6 +16,7 @@ import { REPO_ROOT } from "@aihot/backend/config";
 import { assertSupportedConfig } from "@aihot/backend/sources/config-keys";
 import { fetchWebList } from "@aihot/backend/sources/web-list";
 import { fetchJsonList } from "@aihot/backend/sources/json-list";
+import { fetchRss } from "@aihot/backend/sources/rss";
 import type { Candidate, SourceRow } from "@aihot/backend/sources/types";
 
 /** A title this long is a headline; shorter ones are menu items ("关于我们", "首页"). */
@@ -30,6 +31,8 @@ const { sources } = JSON.parse(readFileSync(path.join(REPO_ROOT, "industry/sourc
 function fetchFor(kind: SourceRow["kind"]): ((s: SourceRow) => Promise<Candidate[]>) | null {
   if (kind === "web_list") return fetchWebList;
   if (kind === "json_list") return fetchJsonList;
+  // fetchRss returns the candidates plus its HTTP validators; only the candidates matter here.
+  if (kind === "rss") return async (s) => (await fetchRss(s, { force: true })).candidates;
   return null;
 }
 
