@@ -35,7 +35,7 @@ const TYPES: Record<string, string> = {
   ".map": "application/json",
 };
 
-const build = await import(path.resolve(import.meta.dirname, "build/server/index.js"));
+const build = await import(new URL("build/server/index.js", import.meta.url).href);
 const ssr = createRequestListener({ build, mode: "production" });
 
 class BadRequest extends Error {}
