@@ -1,5 +1,5 @@
 {
-  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。⚠️ 验证状态：8 家厂商官博已联网核实（2026-09-29）——中文游戏厂商均无标准 RSS，已全部改为 web_list + 真实站点 URL；5 媒体 + 3 买量 + 2 社区的 URL/kind 仍为占位、未核实，上线前需逐一确认（尤其 17173/游民星空的传奇频道 URL、买量平台是否对爬虫开放）。web_list 为通用 HTML 列表解析，各站点可能需后续调 itemSelector/titleSelector 才能稳定抽取正文。owner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
+  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。⚠️ 验证状态（2026-09-29 联网核实）：已核实 8 家厂商官博 + 5 家游戏媒体——中文厂商/媒体均无标准 RSS，全部用 web_list + 真实站点 URL；原占位 URL 几乎全错，已逐个改正。仍未核实：3 家买量平台（App Growing/DataEye/巨量引擎，可能 JS 渲染或对爬虫不友好）+ 2 个社区（NGA/贴吧），上线前需逐一确认。web_list 为通用 HTML 列表解析，各站点可能需调 itemSelector/titleSelector 才能稳定抽取正文。owner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
   "sources": [
     {
       "id": "official-shengqu",
@@ -146,12 +146,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "web-17173-legend",
-      "name": "17173 传奇频道",
+      "id": "web-17173-mir2",
+      "name": "17173 传奇专区",
       "kind": "web_list",
       "config": {
-        "url": "https://news.17173.com/z/legend/",
-        "allowUrlPrefixes": ["https://news.17173.com/z/legend/"],
+        "url": "https://news.17173.com/z/mir2",
+        "allowUrlPrefixes": ["https://news.17173.com/z/mir2"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
@@ -164,12 +164,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "web-gamersky-legend",
-      "name": "游民星空 传奇",
+      "id": "web-gamersky-ol",
+      "name": "游民星空 网游频道",
       "kind": "web_list",
       "config": {
-        "url": "https://www.gamersky.com/",
-        "allowUrlPrefixes": ["https://www.gamersky.com/"],
+        "url": "https://ol.gamersky.com",
+        "allowUrlPrefixes": ["https://ol.gamersky.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
@@ -182,12 +182,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "web-gamegyro",
+      "id": "web-youxituoluo",
       "name": "游戏陀螺",
       "kind": "web_list",
       "config": {
-        "url": "https://www.gamegyro.com/",
-        "allowUrlPrefixes": ["https://www.gamegyro.com/"],
+        "url": "https://www.youxituoluo.com",
+        "allowUrlPrefixes": ["https://www.youxituoluo.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
@@ -200,12 +200,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "web-nadianyixi",
+      "id": "web-nadianshi",
       "name": "手游那点事",
       "kind": "web_list",
       "config": {
-        "url": "https://www.wypxg.com/",
-        "allowUrlPrefixes": ["https://www.wypxg.com/"],
+        "url": "https://www.nadianshi.com",
+        "allowUrlPrefixes": ["https://www.nadianshi.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
@@ -218,12 +218,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "web-gamedog",
-      "name": "游戏大观",
+      "id": "web-youxiputao",
+      "name": "游戏葡萄",
       "kind": "web_list",
       "config": {
-        "url": "https://www.gamedog.cn/",
-        "allowUrlPrefixes": ["https://www.gamedog.cn/"],
+        "url": "https://youxiputao.com",
+        "allowUrlPrefixes": ["https://youxiputao.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
