@@ -1,5 +1,5 @@
 {
-  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。\n\n⚠️ 验证状态（2026-09-29，两轮联网核实）：\n【第1轮·URL 核实】18 条全部核实：8 厂商官博（中文厂商无标准 RSS，占位 feedUrl 失效，全改 web_list + 真实站点）；5 游戏媒体（原占位 URL 全错，逐个改正）；3 买量（官网 URL 正确）；2 社区（NGA 无传奇版块 → 改百度贴吧，kw 已 URL 编码）。\n【第2轮·真实抓取干跑】用采集器同款解析逻辑（fromHtml：解析相对链接 → 套 allowUrlPrefixes → 排除 listingItself/导航链接 → 需有标题）实抓 18 条，结论：\n  ✅ 开箱可用、能抽出真实文章列表（2/18）：official-zhongshouyou、official-juren。\n  ⚠️ 能抓但只抽到导航菜单（“关于我们/集团介绍”），需补 itemSelector/titleSelector（9）：official-shengqu/kaiying/tanwan/shiji/sanqi、web-17173-mir2/gamersky-ol/youxituoluo/dataeye（web-oceanengine 已改 mp_account）。\n  ❌ 不可用（6）：official-wanmei（列表页仅 642B JS 壳）、web-youxiputao（仅 1 条）、web-appgrowing（仅 1 条）、web-nadianshi（域名正确但本环境不可达）、web-tieba-rxcq/legend（403 反爬，需 cookie/JS）。\n  → 结论：①“URL 核实”已 100% 完成；但“能真正抓取”仅 2/18 开箱可用，其余需逐站调 selector 或改采集方式（JS 渲染/cookie/换源），属上线调优 backlog，非配置层可解。r.jina.ai 渲染代理在本环境不可达，无法用它救 JS 壳/403 站。\n【巨量引擎】《游戏x赛道·传奇月报》按月发布、内容为传奇品类投放/CPM/激活付费成本/安卓iOS对比，对本项目价值极高，但只发在微信公众号「巨量引擎营销观察」（微信号 OceanEngineMK），非可爬网页 → 该条设 mp_account（内容需 Dajiala 付费服务）。\n\nowner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
+  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。\n\n⚠️ 验证状态（2026-09-29，三轮联网核实）：\n【第1轮·URL 核实】18 条全部核实：8 厂商官博（中文厂商无标准 RSS，占位 feedUrl 失效，全改 web_list + 真实站点）；5 游戏媒体（原占位 URL 全错，逐个改正）；3 买量（官网 URL 正确）；2 社区（NGA 无传奇版块 → 改百度贴吧）。\n【第2轮·真实抓取干跑】用采集器同款解析逻辑实抓 18 条 URL：仅 2 条开箱能抽出真文章（official-zhongshouyou、official-juren），其余抽到的是导航菜单或空。\n【第3轮·selector 调优】用项目真实 fromHtml 逐条试配并验证，已配好 4 条（均为真文章列表）：\n  ✅ official-shiji   url 改 /News/Index.aspx + itemSelector \"div.NewsContent a\"\n  ✅ web-17173-mir2   itemSelector \"ul.news-list li\" + titleSelector \"a\"\n  ✅ web-gamersky-ol  itemSelector \"div.con\" + allowUrlPrefixes 增列 www.gamersky.com（列表内多为站内 www 域链接）\n  ✅ web-youxituoluo  itemSelector \"div.item.cf\"（标题自带“游戏资讯”分类前缀，属链接文本本身，无法用 selector 去掉）\n  ❌ selector 无解·客户端渲染（5）：official-shengqu（/news 404、/cn/news 仅 5KB JS 壳）、official-kaiying（Next.js，资讯在 __NEXT_DATA__ 的 props.pageProps.groupYearList.data 深层，json_list 的 html_json_key 只认“直接持数组的键”，够不到）、official-tanwan（JS 应用，页面只有导航容器）、official-sanqi（JS 应用，0 容器）、web-dataeye（首页与媒体中心均只有导航）。这 5 条需 JS 渲染（本环境 r.jina.ai 不可达）或找到其内部 JSON 接口后改 json_list。\n  ❌ 另不可用（6）：official-wanmei（列表页仅 642B JS 壳）、web-youxiputao（仅 1 条）、web-appgrowing（仅 1 条）、web-nadianshi（域名正确但本环境不可达）、web-tieba-rxcq/legend（403 反爬，需 cookie/JS）——均需换采集方式或换源。\n【巨量引擎】《游戏x赛道·传奇月报》只发在微信公众号「巨量引擎营销观察」（微信号 OceanEngineMK），非可爬网页 → 该条设 mp_account（内容需 Dajiala 付费服务）。\n\nowner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
   "sources": [
     {
       "id": "official-shengqu",
@@ -78,8 +78,9 @@
       "name": "世纪华通",
       "kind": "web_list",
       "config": {
-        "url": "https://www.sjhuatong.com",
-        "allowUrlPrefixes": ["https://www.sjhuatong.com/"],
+        "url": "https://www.sjhuatong.com/News/Index.aspx",
+        "allowUrlPrefixes": ["https://www.sjhuatong.com/News/"],
+        "itemSelector": "div.NewsContent a",
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
@@ -152,6 +153,8 @@
       "config": {
         "url": "https://news.17173.com/z/mir2",
         "allowUrlPrefixes": ["https://news.17173.com/z/mir2"],
+        "itemSelector": "ul.news-list li",
+        "titleSelector": "a",
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
@@ -169,7 +172,8 @@
       "kind": "web_list",
       "config": {
         "url": "https://ol.gamersky.com",
-        "allowUrlPrefixes": ["https://ol.gamersky.com/"],
+        "allowUrlPrefixes": ["https://ol.gamersky.com/", "https://www.gamersky.com/"],
+        "itemSelector": "div.con",
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
@@ -188,6 +192,7 @@
       "config": {
         "url": "https://www.youxituoluo.com",
         "allowUrlPrefixes": ["https://www.youxituoluo.com/"],
+        "itemSelector": "div.item.cf",
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",

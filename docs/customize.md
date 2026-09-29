@@ -38,6 +38,15 @@
 
 这是首次启动时导入的示范信源，已经存在的不会被覆盖。上线后更常用的是后台“信源”页：能新建、试抓、调频率、看失败原因。
 
+改完信源先干跑一遍，看真实会抓进什么：
+
+```bash
+node scripts/check-sources.ts                 # 全部信源
+node scripts/check-sources.ts official- web-  # 只看这些前缀
+```
+
+它对每条信源实抓一次、走采集器同款解析（`web_list` 用 `fetchWebList`，`json_list` 用 `fetchJsonList`），只把标题够长的算作“头条”。列表页的 `itemSelector` 没配对时，抽出来的是导航菜单（“关于我们”“首页”），脚本会标 `NO HEADLINES`——**这正是配置闸门 `assertSupportedConfig` 查不出来的那类问题**：配置合法，抓到的却是菜单。某个站是客户端渲染（JS 应用）时，HTML 里根本没有文章列表，这类站得换 `json_list` 接口或渲染代理。
+
 每个信源的关键字段：
 
 | 字段 | 含义 |
