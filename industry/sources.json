@@ -1,5 +1,5 @@
 {
-  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。⚠️ 验证状态（2026-09-29 联网核实）：已核实 8 家厂商官博 + 5 家游戏媒体——中文厂商/媒体均无标准 RSS，全部用 web_list + 真实站点 URL；原占位 URL 几乎全错，已逐个改正。仍未核实：3 家买量平台（App Growing/DataEye/巨量引擎，可能 JS 渲染或对爬虫不友好）+ 2 个社区（NGA/贴吧），上线前需逐一确认。web_list 为通用 HTML 列表解析，各站点可能需调 itemSelector/titleSelector 才能稳定抽取正文。owner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
+  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。⚠️ 验证状态（2026-09-29 联网核实）：① 8 厂商官博 + 5 游戏媒体——中文厂商/媒体无标准 RSS，全部 web_list + 真实站点 URL，原占位 URL 几乎全错、已逐个改正；② 3 买量平台官网 URL 已确认正确（App Growing 主站是产品页，改指向 /blog 内容列表；DataEye/巨量引擎指向主站）；③ 2 社区改为百度贴吧（标准 f?kw= URL，kw 已 URL 编码）。⚠️ 上线前仍需：web_list 是通用 HTML 列表解析，各站点版式不同，可能需逐个调 itemSelector/titleSelector 才能稳定抽正文；巨量引擎的《游戏x赛道·传奇月报》价值很高但入口在公众号/报告页，需再补真实 URL。owner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
   "sources": [
     {
       "id": "official-shengqu",
@@ -240,8 +240,8 @@
       "name": "App Growing 买量情报",
       "kind": "web_list",
       "config": {
-        "url": "https://appgrowing.cn/",
-        "allowUrlPrefixes": ["https://appgrowing.cn/"],
+        "url": "https://www.appgrowing.cn/blog",
+        "allowUrlPrefixes": ["https://www.appgrowing.cn/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
@@ -273,10 +273,10 @@
     },
     {
       "id": "web-oceanengine",
-      "name": "巨量引擎 行业动态",
+      "name": "巨量引擎 游戏行业月报",
       "kind": "web_list",
       "config": {
-        "url": "https://www.oceanengine.com/",
+        "url": "https://www.oceanengine.com",
         "allowUrlPrefixes": ["https://www.oceanengine.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
@@ -290,12 +290,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "web-nga-legend",
-      "name": "NGA 传奇专区",
+      "id": "web-tieba-rxcq",
+      "name": "百度贴吧 热血传奇吧",
       "kind": "web_list",
       "config": {
-        "url": "https://nga.178.com/",
-        "allowUrlPrefixes": ["https://nga.178.com/"],
+        "url": "https://tieba.baidu.com/f?kw=%E7%83%AD%E8%A1%80%E4%BC%A0%E5%A5%87",
+        "allowUrlPrefixes": ["https://tieba.baidu.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
@@ -312,7 +312,7 @@
       "name": "百度贴吧 传奇吧",
       "kind": "web_list",
       "config": {
-        "url": "https://tieba.baidu.com/f?kw=传奇",
+        "url": "https://tieba.baidu.com/f?kw=%E4%BC%A0%E5%A5%87",
         "allowUrlPrefixes": ["https://tieba.baidu.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
