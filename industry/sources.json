@@ -1,12 +1,13 @@
 {
-  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。⚠️ 本清单为基于已知传奇/游戏业态整理的占位：feedUrl、kind、adapter 均需在上线前逐一核实——很多中文游戏站点没有标准 RSS，可能要改用 web_list + 适配器，或补官方公众号/视频号源。本环境网络受限，未做实时抓取校验。owner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
+  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。⚠️ 验证状态：8 家厂商官博已联网核实（2026-09-29）——中文游戏厂商均无标准 RSS，已全部改为 web_list + 真实站点 URL；5 媒体 + 3 买量 + 2 社区的 URL/kind 仍为占位、未核实，上线前需逐一确认（尤其 17173/游民星空的传奇频道 URL、买量平台是否对爬虫开放）。web_list 为通用 HTML 列表解析，各站点可能需后续调 itemSelector/titleSelector 才能稳定抽取正文。owner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
   "sources": [
     {
-      "id": "rss-shengqu",
+      "id": "official-shengqu",
       "name": "盛趣游戏官网",
-      "kind": "rss",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://www.shengqu.com/news/",
+        "url": "https://www.shengqugames.com",
+        "allowUrlPrefixes": ["https://www.shengqugames.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
@@ -19,11 +20,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-kaiying",
+      "id": "official-kaiying",
       "name": "恺英网络",
-      "kind": "rss",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://www.kaiying.com/news/",
+        "url": "https://www.kingnet.com",
+        "allowUrlPrefixes": ["https://www.kingnet.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
@@ -36,11 +38,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-tanwan",
+      "id": "official-tanwan",
       "name": "贪玩游戏",
-      "kind": "rss",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://www.tanwan.com/news/",
+        "url": "https://tanwan.cn/news/dt",
+        "allowUrlPrefixes": ["https://tanwan.cn/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
@@ -53,11 +56,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-zhongshouyou",
+      "id": "official-zhongshouyou",
       "name": "中手游",
-      "kind": "rss",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://www.cmge.com/news/",
+        "url": "https://www.cmge.com/cn/news",
+        "allowUrlPrefixes": ["https://www.cmge.com/cn/news"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
@@ -70,11 +74,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-shiji",
+      "id": "official-shiji",
       "name": "世纪华通",
-      "kind": "rss",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://www.shijihuatong.com/news/",
+        "url": "https://www.sjhuatong.com",
+        "allowUrlPrefixes": ["https://www.sjhuatong.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
@@ -87,11 +92,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-sanqi",
+      "id": "official-sanqi",
       "name": "三七互娱",
-      "kind": "rss",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://www.37.com/news/",
+        "url": "https://www.37wan.net",
+        "allowUrlPrefixes": ["https://www.37wan.net/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
@@ -104,11 +110,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-wanmei",
+      "id": "official-wanmei",
       "name": "完美世界游戏",
-      "kind": "rss",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://www.wanmei.com/news/",
+        "url": "https://www.wanmei.com/wmnews/index.html",
+        "allowUrlPrefixes": ["https://www.wanmei.com/"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
@@ -121,11 +128,12 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-juren",
+      "id": "official-juren",
       "name": "巨人网络",
-      "kind": "rss",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://www.ztgame.com/news/",
+        "url": "https://www.ztgame.com/news",
+        "allowUrlPrefixes": ["https://www.ztgame.com/news"],
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
