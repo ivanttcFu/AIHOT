@@ -18,6 +18,7 @@
   ```bash
   npm run typecheck
   DATABASE_URL=postgres://127.0.0.1:5432/<名字>_test npm test   # 空库，名字必须以 _test 或 _ci 结尾，先 node scripts/migrate.ts
+  npm run test:offline                                          # 没有 Postgres 时：只跑不碰库的那些测试，不是全量的替代
   npm run build -w @aihot/web && node --test apps/web/tests/*.test.ts
   node scripts/smoke.ts --base http://localhost:3000             # 站点跑起来以后
   ```
