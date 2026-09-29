@@ -1,386 +1,319 @@
 {
-  "$comment": "示范信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。之后在后台“信源”里增删改。字段说明见 docs/customize.md。",
+  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。⚠️ 本清单为基于已知传奇/游戏业态整理的占位：feedUrl、kind、adapter 均需在上线前逐一核实——很多中文游戏站点没有标准 RSS，可能要改用 web_list + 适配器，或补官方公众号/视频号源。本环境网络受限，未做实时抓取校验。owner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
   "sources": [
     {
-      "id": "rss-openai-news",
-      "name": "OpenAI News",
+      "id": "rss-shengqu",
+      "name": "盛趣游戏官网",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://openai.com/news/rss.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "feedUrl": "https://www.shengqu.com/news/",
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": "openai",
+      "owner_entity_id": "shengqu",
       "participation_mode": "editorial",
       "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
+      "tags": ["官方"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-google-deepmind",
-      "name": "Google DeepMind",
+      "id": "rss-kaiying",
+      "name": "恺英网络",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://deepmind.google/blog/rss.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "feedUrl": "https://www.kaiying.com/news/",
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": "google",
+      "owner_entity_id": "kaiying",
       "participation_mode": "editorial",
       "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
+      "tags": ["官方"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-google-research",
-      "name": "Google Research",
+      "id": "rss-tanwan",
+      "name": "贪玩游戏",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://research.google/blog/rss/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "feedUrl": "https://www.tanwan.com/news/",
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": "google",
+      "owner_entity_id": "tanwan",
       "participation_mode": "editorial",
       "interval_minutes": 120,
-      "tags": [
-        "官方",
-        "研究"
-      ],
+      "tags": ["官方"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-hugging-face",
-      "name": "Hugging Face Blog",
+      "id": "rss-zhongshouyou",
+      "name": "中手游",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://huggingface.co/blog/feed.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "feedUrl": "https://www.cmge.com/news/",
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": "hugging-face",
+      "owner_entity_id": "zhongshouyou",
       "participation_mode": "editorial",
       "interval_minutes": 120,
-      "tags": [
-        "官方",
-        "开源"
-      ],
+      "tags": ["官方"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-microsoft-research",
-      "name": "Microsoft Research",
+      "id": "rss-shiji",
+      "name": "世纪华通",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://www.microsoft.com/en-us/research/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "feedUrl": "https://www.shijihuatong.com/news/",
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": "microsoft",
+      "owner_entity_id": "shiji",
       "participation_mode": "editorial",
       "interval_minutes": 120,
-      "tags": [
-        "官方",
-        "研究"
-      ],
+      "tags": ["官方"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-nvidia-blog",
-      "name": "NVIDIA Blog",
+      "id": "rss-sanqi",
+      "name": "三七互娱",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://blogs.nvidia.com/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "feedUrl": "https://www.37.com/news/",
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": "nvidia",
+      "owner_entity_id": "sanqi",
       "participation_mode": "editorial",
       "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
+      "tags": ["官方"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-aws-ml",
-      "name": "AWS Machine Learning Blog",
+      "id": "rss-wanmei",
+      "name": "完美世界游戏",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://aws.amazon.com/blogs/machine-learning/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "feedUrl": "https://www.wanmei.com/news/",
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": null,
+      "owner_entity_id": "wanmei",
       "participation_mode": "editorial",
       "interval_minutes": 120,
-      "tags": [
-        "官方",
-        "教程"
-      ],
+      "tags": ["官方"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-github-ai",
-      "name": "GitHub Blog · AI & ML",
+      "id": "rss-juren",
+      "name": "巨人网络",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://github.blog/ai-and-ml/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "feedUrl": "https://www.ztgame.com/news/",
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": null,
+      "owner_entity_id": "juren",
       "participation_mode": "editorial",
       "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
+      "tags": ["官方"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-mistral",
-      "name": "Mistral AI",
-      "kind": "rss",
+      "id": "web-17173-legend",
+      "name": "17173 传奇频道",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://mistral.ai/rss.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "first_party": true,
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-bair",
-      "name": "Berkeley AI Research",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://bair.berkeley.edu/blog/feed.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "first_party": true,
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 180,
-      "tags": [
-        "研究"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-the-verge-ai",
-      "name": "The Verge · AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "url": "https://news.17173.com/z/legend/",
+        "allowUrlPrefixes": ["https://news.17173.com/z/legend/"],
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
       "first_party": false,
       "owner_entity_id": null,
       "participation_mode": "editorial",
       "interval_minutes": 60,
-      "tags": [
-        "媒体"
-      ],
+      "tags": ["媒体"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-techcrunch-ai",
-      "name": "TechCrunch · AI",
-      "kind": "rss",
+      "id": "web-gamersky-legend",
+      "name": "游民星空 传奇",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://techcrunch.com/category/artificial-intelligence/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "url": "https://www.gamersky.com/",
+        "allowUrlPrefixes": ["https://www.gamersky.com/"],
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
       "first_party": false,
       "owner_entity_id": null,
       "participation_mode": "editorial",
       "interval_minutes": 60,
-      "tags": [
-        "媒体"
-      ],
+      "tags": ["媒体"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-ars-technica-ai",
-      "name": "Ars Technica · AI",
-      "kind": "rss",
+      "id": "web-gamegyro",
+      "name": "游戏陀螺",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://arstechnica.com/ai/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "url": "https://www.gamegyro.com/",
+        "allowUrlPrefixes": ["https://www.gamegyro.com/"],
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
       "first_party": false,
       "owner_entity_id": null,
       "participation_mode": "editorial",
       "interval_minutes": 60,
-      "tags": [
-        "媒体"
-      ],
+      "tags": ["媒体"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-mit-tech-review-ai",
-      "name": "MIT Technology Review · AI",
-      "kind": "rss",
+      "id": "web-nadianyixi",
+      "name": "手游那点事",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "url": "https://www.wypxg.com/",
+        "allowUrlPrefixes": ["https://www.wypxg.com/"],
+        "_aihot": { "initialBackfillLimit": 8 }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": ["媒体"],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "web-gamedog",
+      "name": "游戏大观",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.gamedog.cn/",
+        "allowUrlPrefixes": ["https://www.gamedog.cn/"],
+        "_aihot": { "initialBackfillLimit": 8 }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": ["媒体"],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "web-appgrowing",
+      "name": "App Growing 买量情报",
+      "kind": "web_list",
+      "config": {
+        "url": "https://appgrowing.cn/",
+        "allowUrlPrefixes": ["https://appgrowing.cn/"],
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
       "first_party": false,
       "owner_entity_id": null,
       "participation_mode": "editorial",
       "interval_minutes": 120,
-      "tags": [
-        "媒体"
-      ],
+      "tags": ["买量"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-the-decoder",
-      "name": "The Decoder",
-      "kind": "rss",
+      "id": "web-dataeye",
+      "name": "DataEye 买量观察",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://the-decoder.com/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T2",
-      "first_party": false,
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 60,
-      "tags": [
-        "媒体"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-simon-willison",
-      "name": "Simon Willison",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://simonwillison.net/atom/everything/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "url": "https://www.dataeye.com/",
+        "allowUrlPrefixes": ["https://www.dataeye.com/"],
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
       "first_party": false,
       "owner_entity_id": null,
       "participation_mode": "editorial",
       "interval_minutes": 120,
-      "tags": [
-        "个人"
-      ],
+      "tags": ["买量"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-import-ai",
-      "name": "Import AI",
-      "kind": "rss",
+      "id": "web-oceanengine",
+      "name": "巨量引擎 行业动态",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://importai.substack.com/feed",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "url": "https://www.oceanengine.com/",
+        "allowUrlPrefixes": ["https://www.oceanengine.com/"],
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
       "first_party": false,
       "owner_entity_id": null,
       "participation_mode": "editorial",
-      "interval_minutes": 180,
-      "tags": [
-        "个人",
-        "周刊"
-      ],
+      "interval_minutes": 120,
+      "tags": ["买量"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-latent-space",
-      "name": "Latent Space",
-      "kind": "rss",
+      "id": "web-nga-legend",
+      "name": "NGA 传奇专区",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://www.latent.space/feed",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
+        "url": "https://nga.178.com/",
+        "allowUrlPrefixes": ["https://nga.178.com/"],
+        "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
       "first_party": false,
       "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 180,
-      "tags": [
-        "个人"
-      ],
+      "participation_mode": "hot_signal",
+      "interval_minutes": 30,
+      "tags": ["社区"],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "web-tieba-legend",
+      "name": "百度贴吧 传奇吧",
+      "kind": "web_list",
+      "config": {
+        "url": "https://tieba.baidu.com/f?kw=传奇",
+        "allowUrlPrefixes": ["https://tieba.baidu.com/"],
+        "_aihot": { "initialBackfillLimit": 8 }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "owner_entity_id": null,
+      "participation_mode": "hot_signal",
+      "interval_minutes": 30,
+      "tags": ["社区"],
       "site_fulltext": false,
       "syndicate_fulltext": false
     }
