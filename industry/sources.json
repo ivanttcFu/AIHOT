@@ -1,5 +1,5 @@
 {
-  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。\n\n⚠️ 验证状态（2026-09-29，七轮联网核实）：\n【第1轮·URL 核实】18 条全部核实：8 厂商官博（中文厂商无标准 RSS，占位 feedUrl 失效，全改 web_list + 真实站点）；5 游戏媒体（原占位 URL 全错，逐个改正）；3 买量（官网 URL 正确）；2 社区（NGA 无传奇版块 → 改百度贴吧）。\n【第2轮·真实抓取干跑】用采集器同款解析逻辑实抓 18 条 URL：仅 2 条开箱能抽出真文章（official-zhongshouyou、official-juren），其余抽到的是导航菜单或空。\n【第3轮·selector 调优】用项目真实 fromHtml 逐条试配并验证，已配好 4 条（均为真文章列表）：\n  ✅ official-shiji   url 改 /News/Index.aspx + itemSelector \"div.NewsContent a\"\n  ✅ web-17173-mir2   itemSelector \"ul.news-list li\" + titleSelector \"a\"\n  ✅ web-gamersky-ol  itemSelector \"div.con\" + allowUrlPrefixes 增列 www.gamersky.com（列表内多为站内 www 域链接）\n  ✅ web-youxituoluo  itemSelector \"div.item.cf\"（标题自带“游戏资讯”分类前缀，属链接文本本身，无法用 selector 去掉）\n  ❌ 原判“selector 无解·客户端渲染”（3 条，其中 2 条已翻案）：official-shengqu（/news 404、/cn/news 仅 5KB JS 壳 —— 第6轮查明它有公开无鉴权 JSON 接口，已改 json_list）、official-tanwan（原文“页面只有导航容器”是**误判**：第6轮查明文章就在 HTML 的 ul.news-list 里，真因是 allowUrlPrefixes 少了 www、文章绝对链接全被过滤）、official-sanqi（真·无源）。（web-dataeye 原列于此，第5轮查明它既非 SPA 亦无 301 循环，实为语言 cookie 门，已修正。）\n【第4轮·挖内部接口】恺英攻下（本轮唯一胜果）：\n  ✅ official-kaiying 改 json_list：url=/news/all + mode=html_json_key + jsonKey=\"props.pageProps.groupYearList.data\" + urlTemplate=\"/news/{id}.html\" + publishedAtUnit=epoch_s → 15 条真文章。\n     过程：CMS 接口 cms-api.kingnet.com 需服务端密钥（客户端 runtimeConfig 只有 api_url，密钥在 serverRuntimeConfig）→ 401；_next/data/{buildId}/… 回退成 HTML；详情页 URL 从 HEZX 组件的 handleClick 挖出：router.push(\"/news/\"+id+\".html\")。\n     为此给 json-list 加了「点号 jsonKey」（原 html_json_key 只按最后一段搜，会先命中同名的 groupYear.data 年份数组）——见 json-list.ts 注释 + tests/sources.test.ts 新用例。\n     备选方案：若该页改版失效，可改用「恺英网络」微信公众号走 mp_account（需 Dajiala 付费服务）。\n  ❌ 另不可用（6）：official-wanmei（列表页仅 642B JS 壳）、web-youxiputao（仅 1 条）、web-appgrowing（仅 1 条）、web-nadianshi（域名正确但本环境不可达）、web-tieba-rxcq/legend（403 反爬，需 cookie/JS）——均需换采集方式或换源。\n【第5轮·DataEye 攻下 + 采集器 cookie 修复】\n  ✅ web-dataeye 改 web_list → url=/media-center.html?tab=ADX&type=YEAR&pageId=1 + itemSelector \"div.col.column\" + titleSelector \"h5\" + publishedAtSelector \"div.time\" → 12 条真报告（含《2026上半年全球手游买量数据报告》）。\n     真相：既非 SPA 亦无 301 循环。根因是「set-cookie + 回跳自身」的语言门——请求带 accept-language 却无 lang cookie 时回 302 指向自身。\n     为此修 packages/backend/src/lib/http-fetch.ts：重定向链现在带上上一跳的 Set-Cookie，同址握手不再死循环；回归测试 tests/sources.test.ts「a listing that gates on the cookie it sets」。\n     分页：url 加 &pageId=N 可翻（服务端分页 12 条/页，共 49 份 5 页；另有 tab=EDX 电商）。\n【第6轮·盛趣+贪玩攻下（在“只碰公开无鉴权接口”的合规约束下）】\n  ✅ official-shengqu 改 json_list：公开 JSONP 接口、无鉴权 —— GET /getNews?model=search&org=0&page_no=1&count=30（去掉 callback 参数即返回裸 JSON）→ itemsPath=data.dataList，全站 291 条资讯；urlTemplate=/cn/detail?id={ID}&type={CategoryCode}（详情页是 SPA 壳）。接口定义从其公开 bundle news.bundle.js 的 STATIC_URL 表挖出。\n  ✅ official-tanwan 改 web_list selector：url 改 https://www.tanwan.cn/news/dt + allowUrlPrefixes 补 www + itemSelector=\"ul.news-list li\" + titleSelector=\"a\" + publishedAtSelector=\"div.news-tit span\" → 11 条。\n  ❌ official-sanqi 确认**真·无源**：官网导航无新闻栏目；/media.html 是图片相册、/news.html 与 /media.html 均 0 条文章锚点；sitemap.xml 404。要覆盖三七须换源（公告走巨潮/深交所，新闻走其公众号）。\n  合规红线（本轮遵守）：只读公开页面与公开无鉴权接口；遇 401/403/验证码即止；不伪造 token、不绕鉴权。\n  附带发现（未改）：json-list.ts 的 rawDropKeys 是死代码（const raw 构建后未使用，push 的实际是 raw:{externalId}）。\n【第7轮·换源（处理 4 条不可用源）】\n  ✅ official-wanmei 改 selector 并指向真实列表页：wmnews/index.html 只是 meta refresh 跳转壳（642B），真列表在 wmnews/wmnews2026/index.html；itemSelector=\"div.news_list\" + titleSelector=\"h2 a\" + publishedAtSelector=\"em\" → 6 条。\n  ✅ web-appgrowing 改 rss：其 WordPress 站有标准订阅源 https://appgrowing.cn/blog/feed → 9 条（原 web_list 只抽到 1-3 条）。\n  ♻️ web-youxiputao → web-youxichaguan 换源：游戏葡萄官网架在 Strikingly（sxlcdn.com）落地页构建器上，内容由 JS 注入、无文章列表；换「游戏茶馆」https://www.youxichaguan.com/（WordPress）itemSelector=\"div.item-content\" + linkSelector=\".item-title a\" → 30 条。\n  ♻️ web-nadianshi → web-gameres 换源：手游那点事域名正确（nadianshi.com）但本环境不可达（旧域 sykong.com 为自签证书）；换「GameRes 游资网」https://www.gameres.com/ itemSelector=\"div.feed-item-right\" + linkSelector=\"h3.feed-item-title a\" → 20 条。\n  ❌ web-tieba-rxcq / web-tieba-legend 仍不可用：百度安全验证硬墙（加 &ie=utf-8&pn=0 仍 403）。要社区源须换平台。\n  ❌ official-sanqi 仍真·无源（见第6轮）。\n  本轮可用源 10 → 14。\n\n【巨量引擎】《游戏x赛道·传奇月报》只发在微信公众号「巨量引擎营销观察」（微信号 OceanEngineMK），非可爬网页 → 该条设 mp_account（内容需 Dajiala 付费服务）。\n\nowner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
+  "$comment": "传奇雷达示范信源（策划占位清单）。首次启动时导入（scripts/seed.ts），已存在的不会被覆盖，之后在后台“信源”里增删改。字段说明见 docs/customize.md。\n\n⚠️ 验证状态（2026-09-29，八轮联网核实）：\n【第1轮·URL 核实】18 条全部核实：8 厂商官博（中文厂商无标准 RSS，占位 feedUrl 失效，全改 web_list + 真实站点）；5 游戏媒体（原占位 URL 全错，逐个改正）；3 买量（官网 URL 正确）；2 社区（NGA 无传奇版块 → 改百度贴吧）。\n【第2轮·真实抓取干跑】用采集器同款解析逻辑实抓 18 条 URL：仅 2 条开箱能抽出真文章（official-zhongshouyou、official-juren），其余抽到的是导航菜单或空。\n【第3轮·selector 调优】用项目真实 fromHtml 逐条试配并验证，已配好 4 条（均为真文章列表）：\n  ✅ official-shiji   url 改 /News/Index.aspx + itemSelector \"div.NewsContent a\"\n  ✅ web-17173-mir2   itemSelector \"ul.news-list li\" + titleSelector \"a\"\n  ✅ web-gamersky-ol  itemSelector \"div.con\" + allowUrlPrefixes 增列 www.gamersky.com（列表内多为站内 www 域链接）\n  ✅ web-youxituoluo  itemSelector \"div.item.cf\"（标题自带“游戏资讯”分类前缀，属链接文本本身，无法用 selector 去掉）\n  ❌ 原判“selector 无解·客户端渲染”（3 条，其中 2 条已翻案）：official-shengqu（/news 404、/cn/news 仅 5KB JS 壳 —— 第6轮查明它有公开无鉴权 JSON 接口，已改 json_list）、official-tanwan（原文“页面只有导航容器”是**误判**：第6轮查明文章就在 HTML 的 ul.news-list 里，真因是 allowUrlPrefixes 少了 www、文章绝对链接全被过滤）、official-sanqi（真·无源）。（web-dataeye 原列于此，第5轮查明它既非 SPA 亦无 301 循环，实为语言 cookie 门，已修正。）\n【第4轮·挖内部接口】恺英攻下（本轮唯一胜果）：\n  ✅ official-kaiying 改 json_list：url=/news/all + mode=html_json_key + jsonKey=\"props.pageProps.groupYearList.data\" + urlTemplate=\"/news/{id}.html\" + publishedAtUnit=epoch_s → 15 条真文章。\n     过程：CMS 接口 cms-api.kingnet.com 需服务端密钥（客户端 runtimeConfig 只有 api_url，密钥在 serverRuntimeConfig）→ 401；_next/data/{buildId}/… 回退成 HTML；详情页 URL 从 HEZX 组件的 handleClick 挖出：router.push(\"/news/\"+id+\".html\")。\n     为此给 json-list 加了「点号 jsonKey」（原 html_json_key 只按最后一段搜，会先命中同名的 groupYear.data 年份数组）——见 json-list.ts 注释 + tests/sources.test.ts 新用例。\n     备选方案：若该页改版失效，可改用「恺英网络」微信公众号走 mp_account（需 Dajiala 付费服务）。\n  ❌ 另不可用（6）：official-wanmei（列表页仅 642B JS 壳）、web-youxiputao（仅 1 条）、web-appgrowing（仅 1 条）、web-nadianshi（域名正确但本环境不可达）、web-tieba-rxcq/legend（403 反爬，需 cookie/JS）——均需换采集方式或换源。\n【第5轮·DataEye 攻下 + 采集器 cookie 修复】\n  ✅ web-dataeye 改 web_list → url=/media-center.html?tab=ADX&type=YEAR&pageId=1 + itemSelector \"div.col.column\" + titleSelector \"h5\" + publishedAtSelector \"div.time\" → 12 条真报告（含《2026上半年全球手游买量数据报告》）。\n     真相：既非 SPA 亦无 301 循环。根因是「set-cookie + 回跳自身」的语言门——请求带 accept-language 却无 lang cookie 时回 302 指向自身。\n     为此修 packages/backend/src/lib/http-fetch.ts：重定向链现在带上上一跳的 Set-Cookie，同址握手不再死循环；回归测试 tests/sources.test.ts「a listing that gates on the cookie it sets」。\n     分页：url 加 &pageId=N 可翻（服务端分页 12 条/页，共 49 份 5 页；另有 tab=EDX 电商）。\n【第6轮·盛趣+贪玩攻下（在“只碰公开无鉴权接口”的合规约束下）】\n  ✅ official-shengqu 改 json_list：公开 JSONP 接口、无鉴权 —— GET /getNews?model=search&org=0&page_no=1&count=30（去掉 callback 参数即返回裸 JSON）→ itemsPath=data.dataList，全站 291 条资讯；urlTemplate=/cn/detail?id={ID}&type={CategoryCode}（详情页是 SPA 壳）。接口定义从其公开 bundle news.bundle.js 的 STATIC_URL 表挖出。\n  ✅ official-tanwan 改 web_list selector：url 改 https://www.tanwan.cn/news/dt + allowUrlPrefixes 补 www + itemSelector=\"ul.news-list li\" + titleSelector=\"a\" + publishedAtSelector=\"div.news-tit span\" → 11 条。\n  ❌ official-sanqi 确认**真·无源**：官网导航无新闻栏目；/media.html 是图片相册、/news.html 与 /media.html 均 0 条文章锚点；sitemap.xml 404。要覆盖三七须换源（公告走巨潮/深交所，新闻走其公众号）。\n  合规红线（本轮遵守）：只读公开页面与公开无鉴权接口；遇 401/403/验证码即止；不伪造 token、不绕鉴权。\n  附带发现（未改）：json-list.ts 的 rawDropKeys 是死代码（const raw 构建后未使用，push 的实际是 raw:{externalId}）。\n【第7轮·换源（处理 4 条不可用源）】\n  ✅ official-wanmei 改 selector 并指向真实列表页：wmnews/index.html 只是 meta refresh 跳转壳（642B），真列表在 wmnews/wmnews2026/index.html；itemSelector=\"div.news_list\" + titleSelector=\"h2 a\" + publishedAtSelector=\"em\" → 6 条。\n  ✅ web-appgrowing 改 rss：其 WordPress 站有标准订阅源 https://appgrowing.cn/blog/feed → 9 条（原 web_list 只抽到 1-3 条）。\n  ♻️ web-youxiputao → web-youxichaguan 换源：游戏葡萄官网架在 Strikingly（sxlcdn.com）落地页构建器上，内容由 JS 注入、无文章列表；换「游戏茶馆」https://www.youxichaguan.com/（WordPress）itemSelector=\"div.item-content\" + linkSelector=\".item-title a\" → 30 条。\n  ♻️ web-nadianshi → web-gameres 换源：手游那点事域名正确（nadianshi.com）但本环境不可达（旧域 sykong.com 为自签证书）；换「GameRes 游资网」https://www.gameres.com/ itemSelector=\"div.feed-item-right\" + linkSelector=\"h3.feed-item-title a\" → 20 条。\n  ❌ web-tieba-rxcq / web-tieba-legend 仍不可用：百度安全验证硬墙（加 &ie=utf-8&pn=0 仍 403）。要社区源须换平台。\n  ❌ official-sanqi 仍真·无源（见第6轮）。\n  本轮可用源 10 → 14。\n\n【第8轮·补齐最后 3 条（三七→深交所公告；贴吧×2→真传奇社区）】\n  ✅ official-sanqi  web_list → json_list（深交所公开公告接口，无鉴权）：POST https://www.szse.cn/api/disc/announcement/annList + bodyJson {stock:[\"002555\"],channelCode:[\"listedNotice_disc\"],pageSize:30,pageNum:1} → itemsPath=\"data\" + titlePaths=[\"title\"] + publishedAtPath=\"publishTime\" + externalIdPath=\"annId\" + urlTemplate=\"https://disc.szse.cn/download{attachPath}\"（实测该 URL 返回 200 PDF）→ 30 条公告。**三七官网确无新闻栏目，改用它自己的法定披露渠道**（公告≠新闻，属资料补充）。\n  ♻️ web-tieba-rxcq（百度贴吧 热血传奇吧）→ web-qisu「奇速论坛」：贴吧是**百度安全验证硬墙**（403，加 &ie=utf-8&pn=0 仍 403）→ 换 Discuz 社区 bbs.73su.com/forum-2-1.html（传奇版本库）itemSelector=\"a.xst\" → 87 条。\n  ♻️ web-tieba-legend（百度贴吧 传奇吧）→ web-cqtieba「大渝传奇论坛」：换 Discuz 社区 www.cqtieba.com/forum.php?mod=forumdisplay&fid=2（热血传奇）itemSelector=\"a.xst\" → 16 条。该坛帖中见「采用996pc引擎」等与本站直接相关的讨论。\n  本轮可用源 14 → 17；18 条中仅 mp_account（巨量引擎月报）待 Dajiala 付费。\n  合规红线（本轮遵守）：只读公开页面 / 公开无鉴权接口（深交所公告接口系交易所法定公开披露渠道）；遇 403 即止，不绕百度安全验证。\n\n【巨量引擎】《游戏x赛道·传奇月报》只发在微信公众号「巨量引擎营销观察」（微信号 OceanEngineMK），非可爬网页 → 该条设 mp_account（内容需 Dajiala 付费服务）。\n\nowner_entity_id 必须落在 industry/taxonomy.ts 的 ENTITIES（shengqu/kaiying/tanwan/zhongshouyou/shiji/sanqi/wanmei/juren/own）。",
   "sources": [
     {
       "id": "official-shengqu",
@@ -110,11 +110,18 @@
     },
     {
       "id": "official-sanqi",
-      "name": "三七互娱",
-      "kind": "web_list",
+      "name": "三七互娱 公告（深交所）",
+      "kind": "json_list",
       "config": {
-        "url": "https://www.37wan.net",
-        "allowUrlPrefixes": ["https://www.37wan.net/"],
+        "url": "https://www.szse.cn/api/disc/announcement/annList",
+        "method": "POST",
+        "headers": { "referer": "https://www.szse.cn/disclosure/listed/notice/index.html" },
+        "bodyJson": { "stock": ["002555"], "channelCode": ["listedNotice_disc"], "pageSize": 30, "pageNum": 1 },
+        "itemsPath": "data",
+        "titlePaths": ["title"],
+        "publishedAtPath": "publishTime",
+        "externalIdPath": "annId",
+        "urlTemplate": "https://disc.szse.cn/download{attachPath}",
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T1",
@@ -321,12 +328,13 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "web-tieba-rxcq",
-      "name": "百度贴吧 热血传奇吧",
+      "id": "web-qisu",
+      "name": "奇速论坛（传奇版本库）",
       "kind": "web_list",
       "config": {
-        "url": "https://tieba.baidu.com/f?kw=%E7%83%AD%E8%A1%80%E4%BC%A0%E5%A5%87",
-        "allowUrlPrefixes": ["https://tieba.baidu.com/"],
+        "url": "https://bbs.73su.com/forum-2-1.html",
+        "allowUrlPrefixes": ["https://bbs.73su.com/"],
+        "itemSelector": "a.xst",
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
@@ -339,12 +347,13 @@
       "syndicate_fulltext": false
     },
     {
-      "id": "web-tieba-legend",
-      "name": "百度贴吧 传奇吧",
+      "id": "web-cqtieba",
+      "name": "大渝传奇论坛",
       "kind": "web_list",
       "config": {
-        "url": "https://tieba.baidu.com/f?kw=%E4%BC%A0%E5%A5%87",
-        "allowUrlPrefixes": ["https://tieba.baidu.com/"],
+        "url": "https://www.cqtieba.com/forum.php?mod=forumdisplay&fid=2",
+        "allowUrlPrefixes": ["https://www.cqtieba.com/"],
+        "itemSelector": "a.xst",
         "_aihot": { "initialBackfillLimit": 8 }
       },
       "tier": "T2",
